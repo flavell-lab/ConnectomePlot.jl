@@ -1,3 +1,21 @@
+"""
+    color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba;
+        default_rgba=[0.,0.,0.,0.05], node_size=50, edge_color=(0.7,0.7,0.7,0.1),
+        edge_thicness_scaler=0.2)
+
+Color the connectome graph.
+
+# Arguments
+- `g_plot::PyCall.PyObject`: graph object
+- `list_node_rm::Vector{String}`: list of nodes to be removed
+- `dict_x::Dict{String,Float64}`: dictionary of x position of each node
+- `dict_y::Dict{String,Float64}`: dictionary of y position of each node
+- `dict_rgba::Dict{String,Vector{Float64}}`: dictionary of rgba color of each node
+- `default_rgba::Vector{Float64}`: default rgba color
+- `node_size::Int64`: node size
+- `edge_color::Vector{Float64}`: edge color
+- `edge_thicness_scaler::Float64`: edge thickness scaler
+"""
 function color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba;
     default_rgba=[0.,0.,0.,0.05], node_size=50, edge_color=(0.7,0.7,0.7,0.1),
     edge_thicness_scaler=0.2)
@@ -6,7 +24,7 @@ function color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba;
     dict_pos = Dict()
     dict_node_color = Dict()
 
-    # graph
+    # graph: remove nodes
     g = py_copy.deepcopy(g_plot)
     for node = list_node_rm
         g.remove_node(node)
@@ -53,31 +71,5 @@ function color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba;
     py_nx.draw_networkx_edges(g, dict_pos, style="-", arrows=false, edge_color=edge_color,
         edgelist=[(u,v) for (u,v) =  g.edges],
         width=[g.edges.get((u,v))["weight"] * edge_thicness_scaler for (u,v) = g.edges])     
-    end
 
-    function rescale_to_range(value::Float64, input_range::Tuple{Float64, Float64}, output_range::Tuple{Float64, Float64})
-    input_min, input_max = input_range
-    output_min, output_max = output_range
-
-    if input_min == input_max
-        error("Input range cannot have equal min and max values.")
-    end
-
-    # Normalize the input value to a range of [0, 1]
-    normalized_value = (value - input_min) / (input_max - input_min)
-
-    # Scale the normalized value to the output range
-    rescaled_value = output_min + (normalized_value * (output_max - output_min))
-
-    return rescaled_value
-    end
-
-    function add_list_dict!(dict, key, item)
-    if haskey(dict, key)
-        push!(dict[key], item)
-    else
-        dict[key] = [item]
-    end
-
-    nothing
 end
