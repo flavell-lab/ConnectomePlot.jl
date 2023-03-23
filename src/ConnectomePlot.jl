@@ -12,6 +12,6 @@ export get_neuron_type_wh_lr,
     get_graph_white_lr_p,
     get_sensory_muscle,
     # graph.jl
-    plot_connectome
+    color_connectome
 
 end # module ConnectomePlot
