@@ -54,8 +54,8 @@ function get_graph_white_lr(min_n_edge=1, merge_dv=false)
         for synapse = connectome
             syn_type = synapse["typ"] == 0 ? "chemical" : "electrical"
 
-            pre = synapse["pre"]
-            post = synapse["post"]
+            pre = get_node_name(synapse["pre"], dv=merge_dv)
+            post = get_node_name(synapse["post"], dv=merge_dv)
             edge_count = sum(synapse["syn"])
                         
             k = (pre,post,syn_type)
