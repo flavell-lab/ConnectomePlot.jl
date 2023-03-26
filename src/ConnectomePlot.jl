@@ -7,9 +7,10 @@ include("data.jl")
 include("graph.jl")
 include("plot.jl")
 
-export get_neuron_type_wh_lr,
-    get_graph_white_lr,
-    get_graph_white_lr_p,
+export get_neuron_type_wh_dvlr,
+    get_node_name,
+    get_graph_white,
+    get_graph_white_p,
     get_sensory_muscle,
     # graph.jl
     color_connectome

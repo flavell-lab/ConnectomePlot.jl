@@ -1,4 +1,4 @@
-function get_neuron_type_wh_lr(class)
+function get_neuron_type_wh_dvlr(class)
     list_motor_prefix = ["AS", "VD", "VC", "VB", "VA", "DA", "DB", "DD"]
     
     REF = NeuroPALData.NEURON_REF_DICT
@@ -14,33 +14,31 @@ function get_neuron_type_wh_lr(class)
     end
 end
 
-function get_node_name(neuron; dv=true)
-    REF = NeuroPALData.NEURON_REF_DICT
-    if haskey(REF, neuron)
-        neuron_ = REF[neuron]
-        class_ = neuron_["class"]
-        if !dv
-            return class_
-        else
-            if neuron_["DV"] != "undefined"
-                return class_ * neuron_["DV"]
-            else
-                return class_
-            end
+function get_node_name(neuron; dv=true, lr=true)
+    try
+        class, dv_, lr_ = get_neuron_class(neuron)
+        return_str = class
+        if dv && (dv_ != "undefined") && (dv_ != "missing")
+            return_str *= dv_
         end
-    else
+        if lr && (lr_ != "undefined") && (lr_ != "missing")
+            return_str *= lr_
+        end
+        
+        return return_str
+    catch
         return neuron
     end
 end
 
 # generate graph
-function get_graph_white_lr(min_n_edge=1, merge_dv=false)
+function get_graph_white(min_n_edge=1, merge_dv=false, merge_lr=false)
     list_connectome = [data_connectome_white]
     
     list_neuron = []
     for connectome = list_connectome
-        append!(list_neuron, map(x->get_node_name(x["pre"], dv=merge_dv), connectome))
-        append!(list_neuron, map(x->get_node_name(x["post"], dv=merge_dv), connectome))
+        append!(list_neuron, map(x->get_node_name(x["pre"], dv=!merge_dv, lr=!merge_lr), connectome))
+        append!(list_neuron, map(x->get_node_name(x["post"], dv=!merge_dv, lr=!merge_lr), connectome))
     end
     list_neuron = sort(unique(list_neuron))
         
@@ -54,8 +52,8 @@ function get_graph_white_lr(min_n_edge=1, merge_dv=false)
         for synapse = connectome
             syn_type = synapse["typ"] == 0 ? "chemical" : "electrical"
 
-            pre = get_node_name(synapse["pre"], dv=merge_dv)
-            post = get_node_name(synapse["post"], dv=merge_dv)
+            pre = get_node_name(synapse["pre"], dv=!merge_dv, lr=!merge_lr)
+            post = get_node_name(synapse["post"], dv=!merge_dv, lr=!merge_lr)
             edge_count = sum(synapse["syn"])
                         
             k = (pre,post,syn_type)
@@ -106,8 +104,8 @@ function get_graph_white_lr(min_n_edge=1, merge_dv=false)
     g
 end
 
-function get_graph_white_lr_p(min_n_edge=1)
-    g_wh_lr_p = get_graph_white_lr(min_n_edge=min_n_edge)
+function get_graph_white_p(min_n_edge=1, merge_dv=false, merge_lr=false)
+    g_wh_lr_p = get_graph_white_lr(min_n_edge=min_n_edge, merge_dv=merge_dv, merge_lr=merge_lr)
     g = g_wh_lr_p
 
     # remove orphan node, pharyngeal
