@@ -32,7 +32,7 @@ function get_node_name(neuron; dv=true, lr=true)
 end
 
 # generate graph
-function get_graph_white(min_n_edge=1, merge_dv=false, merge_lr=false)
+function get_graph_white(min_n_edge=1; merge_dv=false, merge_lr=false)
     list_connectome = [data_connectome_white]
     
     list_neuron = []
@@ -104,8 +104,8 @@ function get_graph_white(min_n_edge=1, merge_dv=false, merge_lr=false)
     g
 end
 
-function get_graph_white_p(min_n_edge=1, merge_dv=false, merge_lr=false)
-    g_wh_lr_p = get_graph_white_lr(min_n_edge=min_n_edge, merge_dv=merge_dv, merge_lr=merge_lr)
+function get_graph_white_p(min_n_edge=1; merge_dv=false, merge_lr=false)
+    g_wh_lr_p = get_graph_white_lr(min_n_edge, merge_dv=merge_dv, merge_lr=merge_lr)
     g = g_wh_lr_p
 
     # remove orphan node, pharyngeal
