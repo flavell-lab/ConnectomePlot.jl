@@ -138,7 +138,7 @@ end
     list_muscle = String[]
 
     for node = list_node
-        type_ = get_neuron_type_wh_lr(node)
+        type_ = get_neuron_type_wh_dvlr(node)
         if type_ == "sensory"
             push!(list_sensory, node)
         elseif startswith(type_, "muscle")
