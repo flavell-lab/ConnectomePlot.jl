@@ -105,7 +105,7 @@ function get_graph_white(min_n_edge=1; merge_dv=false, merge_lr=false)
 end
 
 function get_graph_white_p(min_n_edge=1; merge_dv=false, merge_lr=false)
-    g_wh_lr_p = get_graph_white_lr(min_n_edge, merge_dv=merge_dv, merge_lr=merge_lr)
+    g_wh_lr_p = get_graph_white(min_n_edge, merge_dv=merge_dv, merge_lr=merge_lr)
     g = g_wh_lr_p
 
     # remove orphan node, pharyngeal
