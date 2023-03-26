@@ -67,7 +67,8 @@ function color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba;
     end    
 
     list_node_color = hcat([dict_node_color[node] for node = g.nodes()]...)'
-    py_nx.draw_networkx_nodes(g, dict_pos, node_size=node_size, node_color=list_node_color)
+    nodes = py_nx.draw_networkx_nodes(g, dict_pos, node_size=node_size, node_color=list_node_color)
+    nodes.set_edgecolor("none")
     py_nx.draw_networkx_edges(g, dict_pos, style="-", arrows=false, edge_color=edge_color,
         edgelist=[(u,v) for (u,v) =  g.edges],
         width=[g.edges.get((u,v))["weight"] * edge_thicness_scaler for (u,v) = g.edges])     
