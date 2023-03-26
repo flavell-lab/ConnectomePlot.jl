@@ -15,7 +15,7 @@ function get_neuron_type_wh_lr(class)
 end
 
 # generate graph
-function get_graph_white_lr()
+function get_graph_white_lr(min_n_edge=1)
     list_connectome = [data_connectome_white]
     
     list_neuron = []
@@ -52,7 +52,7 @@ function get_graph_white_lr()
     dict_synapse_combine = Dict()
     for ((pre,post,syn_type), edge_count) = dict_synapese
         if pre != post
-            if edge_count > 1
+            if edge_count > min_n_edge
                 k = (pre,post)
                 if haskey(dict_synapse_combine, k)
                     dict_synapse_combine[k] += edge_count
@@ -60,7 +60,7 @@ function get_graph_white_lr()
                     dict_synapse_combine[k] = edge_count
                 end
                 
-                if syn_type == "electrical"
+                if syn_type == "electrical" # treat electrical synapse as bidirectional
                     k = (post,pre)
                     if haskey(dict_synapse_combine, k)
                         dict_synapse_combine[k] += edge_count
@@ -68,9 +68,9 @@ function get_graph_white_lr()
                         dict_synapse_combine[k] = edge_count
                     end
                 end
-            end
-        end
-    end
+            end # if edge_count > min_n_edge
+        end # if pre != post
+    end # for dict_synapese
     
     for ((pre,post), edge_count) = dict_synapse_combine
         g.add_edge(pre, post, weight=(edge_count))  
@@ -87,8 +87,8 @@ function get_graph_white_lr()
     g
 end
 
-function get_graph_white_lr_p()
-    g_wh_lr_p = get_graph_white_lr()
+function get_graph_white_lr_p(min_n_edge=1)
+    g_wh_lr_p = get_graph_white_lr(min_n_edge=min_n_edge)
     g = g_wh_lr_p
 
     # remove orphan node, pharyngeal
