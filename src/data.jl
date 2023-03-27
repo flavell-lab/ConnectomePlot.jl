@@ -20,3 +20,17 @@ const dict_pos_v3_p = h5read(path_connectome_p_plot, "v3")
 const dict_pos_z = merge(dict_pos_z_non_p, dict_pos_z_p)
 const dict_pos_v2 = merge(dict_pos_v2_non_p, dict_pos_v2_p)
 const dict_pos_v3 = merge(dict_pos_v3_non_p, dict_pos_v3_p)
+
+# witvliet neuron type reference
+const path_witvliet_type = joinpath(@__DIR__, "..", "data", "witvliet_table_s1.csv")
+const witvliet_type = let
+    witvliet_s1 = readdlm(path_witvliet_type, ',');
+    witvliet_type = Dict{String,String}()
+    for i = 1:(size(witvliet_s1,1)-1)
+        neuron = witvliet_s1[i+1,1]
+        type_ = witvliet_s1[i+1,3]
+        witvliet_type[neuron] = type_
+    end
+
+    witvliet_type
+end

@@ -14,6 +14,42 @@ function get_neuron_type_wh_dvlr(class)
     end
 end
 
+function get_neuron_type_wv(class)
+    manual_list_unknown = ["CEPshD", "CEPshV", "GLRD", "GLRV", "NR_fragment", "vncfrag", "G1", "G2", "CAN","VAn","Fragment"]
+    manual_list_muscle = ["pm5", "pm1", "pm4", "pm3", "pm6", "pm7", "mc3", "mc2", "pm2"]
+    manual_list_modulatory = ["HSNL", "HSNR", "NSM"]
+    manual_list_interneuron = ["I1", "I2", "I3", "I4", "I5", "I6"]
+    manual_list_motorneuron = ["M1", "M2", "M3", "M4", "M5", "MC", "MI"]
+
+    # remove d/v and l/r
+    try
+        class, dv, lr = get_neuron_class(class)
+    catch
+    end
+    
+    if haskey(witvliet_type, class)
+        return witvliet_type[class]
+    else
+        if startswith(class, "BWM")
+            return "muscle"
+        elseif class in manual_list_unknown
+            return "unknown"
+        elseif class in manual_list_muscle
+            return "muscle"
+        elseif class in manual_list_modulatory
+            return "modulatory"
+        elseif class in manual_list_interneuron
+            return "inter"
+        elseif class in manual_list_motorneuron
+            return "motor"
+        elseif endswith(class, "D") || endswith(class, "V")
+            witvliet_type[class[1:end-1]]
+        else
+            error("$class is unknown")
+        end
+    end
+end
+
 function get_node_name(neuron; dv=true, lr=true)
     try
         class, dv_, lr_ = get_neuron_class(neuron)
@@ -132,7 +168,7 @@ function get_graph_white_p(min_n_edge=1; merge_dv=false, merge_lr=false)
     g
 end
 
-function get_graph_witvliet(min_n_edge=1; merge_dv=false, merge_lr=false)
+function get_graph_witvliet(min_n_edge=2; merge_dv=false, merge_lr=false)
     list_connectome = [data_connectome_witvliet_7, data_connectome_witvliet_8]
     
     # get list of neurons in the connectome
