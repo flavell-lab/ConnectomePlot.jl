@@ -11,6 +11,7 @@ export get_neuron_type_wh_dvlr,
     get_node_name,
     get_graph_white,
     get_graph_white_p,
+    get_graph_witvliet,
     get_sensory_muscle,
     # graph.jl
     color_connectome
