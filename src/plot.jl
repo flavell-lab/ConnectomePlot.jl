@@ -115,7 +115,7 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     end
 
     ## plot
-    fig = figure(figsize=(3,3))
+    fig = figure(figsize=figsize)
     gs = matplotlib.gridspec.GridSpec(4,4) # row, col
     
     ## scatter
@@ -149,7 +149,7 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
 
     ## random sampling among the recorded neurons
     println(n_neuron_select)
-    for i_trial = 1:n_control
+    @showprogress for i_trial = 1:n_control
         idx_rand = sample(idx_all, n_neuron_select, replace=false)
         kd_x_rand = kde(list_x[idx_rand])
         kd_y_rand = kde(list_y[idx_rand])
@@ -175,8 +175,8 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     pdf_y = ax_Δratio * [pdf(kd_y_select,pd) for pd = rg_y]
     x1, x2, x3, _ = aggregate_var(rand_y_kde, dim=2, f_var=f_control_var)
 
-    plot_ymax = maximum(pdf_x), maximum(y3)
-    plot_xmax = ax_Δratio * maximum(pdf_y), maximum(x3)
+    plot_ymax = max(maximum(pdf_x), maximum(y3))
+    plot_xmax = max(maximum(pdf_y), maximum(x3))
     plot_max = max(plot_ymax, plot_xmax)
 
     # kde top (x)
@@ -187,8 +187,7 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     # plot kde - random control
     plot(rg_x, y2, color="gray")
     fill_between(rg_x, y1, y3, color="gray", alpha=0.2, linewidth=0)
-
-    ylim(-5,plot_max)
+    ylim(-5.,plot_max)
     axis("off")
 
     # kde right (y)
@@ -200,7 +199,7 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     plot(ax_Δratio * x2, rg_y, color="gray")
     fill_betweenx(rg_y, ax_Δratio * x1, ax_Δratio * x3, color="gray", alpha=0.2)
 
-    xlim(-5,plot_max)
+    xlim(-5.,plot_max)
     axis("off")
 
     # remove space between subplots
