@@ -18,7 +18,6 @@ function rescale_to_range(value::Float64, input_range::Tuple{Float64, Float64},
     return rescaled_value
 end
 
-
 """
     color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba;
         default_rgba=[0.,0.,0.,0.05], node_size=50, edge_color=(0.7,0.7,0.7,0.1),
@@ -133,7 +132,7 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     rg_x = ax_xlim[1]:ax_Δx:ax_xlim[2]
     rg_y = ax_ylim[1]:ax_Δy:ax_ylim[2]
    
-    list_x, list_y, list_f = get_connectome_plot_lists(dict_x, dict_y, dict_feature, f_select)
+    list_x, list_y, list_f = get_connectome_plot_lists(dict_x, dict_y, dict_v, f_select)
     @assert(length(list_x) == length(list_y) == length(list_f))
 
     idx_all = 1:length(list_f)
