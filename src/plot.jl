@@ -145,7 +145,7 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
 
     ## random sampling among the recorded neurons
     for i_trial = 1:n_control
-        idx_rand = sample(idx_all, n_neuron_long, replace=false)
+        idx_rand = sample(idx_all, n_neuron_select, replace=false)
         kd_x_rand = kde(list_x[idx_rand])
         kd_y_rand = kde(list_y[idx_rand])
         ik_x_rand = InterpKDE(kd_x_rand)
