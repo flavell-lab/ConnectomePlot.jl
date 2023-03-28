@@ -249,3 +249,31 @@ function get_sensory_muscle(g)
     
     list_sensory, list_muscle
 end
+
+function get_connectome_plot_lists(dict_x, dict_y, dict_feature, f_feature::Function=identity)
+    list_x = Float64[]
+    list_y = Float64[]
+    list_f = valtype(dict_feature)[]
+
+    for (neuron,x) = dict_x
+        if get_neuron_type_wh_dvlr(neuron) !== "motorneuron"
+            class, dv, lr = get_neuron_class(neuron)
+            
+            class_dv = class
+            if !(dv == "missing" || dv == "undefined")
+                class_dv = class * dv
+            end
+            
+            if haskey(dict_feature, class_dv)
+                push!(list_x, x)
+                push!(list_y, dict_y[neuron])
+                push!(list_f, dict_feature[class_dv])
+            else
+                # missing
+            end
+
+        end
+    end
+    
+    list_x, list_y, list_f
+end

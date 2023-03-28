@@ -14,6 +14,7 @@ export get_neuron_type_wh_dvlr,
     get_graph_witvliet,
     get_sensory_muscle,
     # graph.jl
-    color_connectome
+    color_connectome,
+    color_connectome_kde
 
 end # module ConnectomePlot
