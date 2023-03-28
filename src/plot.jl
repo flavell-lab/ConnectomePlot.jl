@@ -98,7 +98,8 @@ end
 function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, dict_v::Dict,
     f_select::Function; f_feature::Function=identity, default_rgba=[0.,0.,0.,0.05], node_size=50,
     edge_color=(0.7,0.7,0.7,0.1), edge_thicness_scaler=0.2,
-    cmap=ColorMap("viridis"), vmin=0, vmax=1, figsize=(3,3), n_control=10000, f_control_var::Function=std)
+    cmap=ColorMap("viridis"), vmin::Float64=0., vmax::Float64=1.,
+    figsize=(3,3), n_control=10000, f_control_var::Function=std)
     ## graph: remove nodes
     g = py_copy.deepcopy(g_plot)
     for node = list_node_rm
@@ -143,7 +144,7 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     rand_y_kde = zeros(length(rg_y), n_control)
 
     ## random sampling among the recorded neurons
-    for i_trial = 1:n_trial
+    for i_trial = 1:n_control
         idx_rand = sample(idx_all, n_neuron_long, replace=false)
         kd_x_rand = kde(list_x[idx_rand])
         kd_y_rand = kde(list_y[idx_rand])
