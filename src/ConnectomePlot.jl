@@ -1,6 +1,7 @@
 module ConnectomePlot
 
-using PyCall, JSON, NeuroPALData, HDF5, PyPlot, DelimitedFiles, Statistics, StatsBase
+using PyCall, JSON, NeuroPALData, HDF5, PyPlot, DelimitedFiles, Statistics, StatsBase,
+    KernelDensity
 
 include("init.jl")
 include("data.jl")
