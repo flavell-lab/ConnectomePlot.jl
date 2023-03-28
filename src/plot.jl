@@ -99,7 +99,7 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     f_select::Function; f_feature::Function=identity, default_rgba=[0.,0.,0.,0.05], node_size=50,
     edge_color=(0.7,0.7,0.7,0.1), edge_thicness_scaler=0.2,
     cmap=ColorMap("viridis"), vmin::Float64=0., vmax::Float64=1.,
-    figsize=(3,3), n_control=10000, f_control_var::Function=std)
+    figsize=(3,3), n_control=10000, f_control_var::Function=std, verbose=true)
     ## graph: remove nodes
     g = py_copy.deepcopy(g_plot)
     for node = list_node_rm
@@ -140,15 +140,22 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     idx_select = findall(f_select.(list_f))
     n_neuron_select = length(idx_select)
 
-    if n_neuron_select < 2
-        error("n_neuron_select < 2")
+    if n_neuron_select < 3
+        error("n_neuron_select < 3")
     end
 
     rand_x_kde = zeros(length(rg_x), n_control)
     rand_y_kde = zeros(length(rg_y), n_control)
 
     ## random sampling among the recorded neurons
-    println(n_neuron_select)
+    if verbose
+        println("neuron selected: $n_neuron_select \
+        percentage: $(round(n_neuron_select/length(list_f)*100, digits=2))")
+    end
+
+    if verbose
+        println("random sampling among the recorded neurons. trial: $n_control")
+    end
     @showprogress for i_trial = 1:n_control
         idx_rand = sample(idx_all, n_neuron_select, replace=false)
         kd_x_rand = kde(list_x[idx_rand])
@@ -177,7 +184,7 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
 
     plot_ymax = max(maximum(pdf_x), maximum(y3))
     plot_xmax = max(maximum(pdf_y), maximum(x3))
-    plot_max = max(plot_ymax, plot_xmax)
+    plot_max = 1.05 * max(plot_ymax, plot_xmax)
 
     # kde top (x)
     # plot kde - selected features
