@@ -137,13 +137,14 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     @assert(length(list_x) == length(list_y) == length(list_f))
 
     idx_all = 1:length(list_f)
-    idx_select = findall(list_f .>= 15)
+    idx_select = findall(f_select.(list_f))
     n_neuron_select = length(idx_select)
 
     rand_x_kde = zeros(length(rg_x), n_control)
     rand_y_kde = zeros(length(rg_y), n_control)
 
     ## random sampling among the recorded neurons
+    println(n_neuron_select)
     for i_trial = 1:n_control
         idx_rand = sample(idx_all, n_neuron_select, replace=false)
         kd_x_rand = kde(list_x[idx_rand])

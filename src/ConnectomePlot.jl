@@ -1,7 +1,7 @@
 module ConnectomePlot
 
 using PyCall, JSON, NeuroPALData, HDF5, PyPlot, DelimitedFiles, Statistics, StatsBase,
-    KernelDensity
+    KernelDensity, FlavellBase, ProgressMeter
 
 include("init.jl")
 include("data.jl")
