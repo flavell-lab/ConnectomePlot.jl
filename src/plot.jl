@@ -140,6 +140,10 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     idx_select = findall(f_select.(list_f))
     n_neuron_select = length(idx_select)
 
+    if n_neuron_select < 2
+        error("n_neuron_select < 2")
+    end
+
     rand_x_kde = zeros(length(rg_x), n_control)
     rand_y_kde = zeros(length(rg_y), n_control)
 
