@@ -82,7 +82,7 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     edge_color=(0.7,0.7,0.7,0.1), edge_thicness_scaler=0.2,
     cmap=ColorMap("viridis"), vmin=0, vmax=1, figsize=(3,3), n_control=10000, f_control_var::Function=std)
     ## graph: remove nodes
-    g = py_copy.deepcopy(g_wh_lr)
+    g = py_copy.deepcopy(g_plot)
     for node = list_node_rm
         g.remove_node(node)
     end
