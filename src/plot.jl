@@ -204,7 +204,7 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
 
     # plot kde - random control
     plot(ax_Δratio * x2, rg_y, color="gray")
-    fill_betweenx(rg_y, ax_Δratio * x1, ax_Δratio * x3, color="gray", alpha=0.2)
+    fill_betweenx(rg_y, ax_Δratio * x1, ax_Δratio * x3, color="gray", alpha=0.2, linewidth=0)
 
     xlim(-5.,plot_max)
     axis("off")
