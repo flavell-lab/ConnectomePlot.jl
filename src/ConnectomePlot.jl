@@ -16,6 +16,8 @@ export get_neuron_type_wh_dvlr,
     get_sensory_muscle,
     # graph.jl
     color_connectome,
-    color_connectome_kde
+    color_connectome_kde,
+    # data.jl
+    get_dict_pos_patched
 
 end # module ConnectomePlot
