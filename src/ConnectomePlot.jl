@@ -7,6 +7,7 @@ include("init.jl")
 include("data.jl")
 include("graph.jl")
 include("plot.jl")
+include("table.jl")
 
 export get_neuron_type_wh_dvlr,
     get_node_name,
@@ -18,6 +19,10 @@ export get_neuron_type_wh_dvlr,
     color_connectome,
     color_connectome_kde,
     # data.jl
-    get_dict_pos_patched
-
+    get_dict_pos_patched,
+    # table.jl
+    generate_check_categorization,
+    get_tau,
+    neuropal_aggregate_data,
+    neuropal_count
 end # module ConnectomePlot
