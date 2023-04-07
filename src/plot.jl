@@ -1,23 +1,5 @@
 pyb_slice(i,j) = pycall(pybuiltin("slice"), PyObject, i,j)
 
-function rescale_to_range(value::Float64, input_range::Tuple{Float64, Float64},
-    output_range::Tuple{Float64, Float64})
-    input_min, input_max = input_range
-    output_min, output_max = output_range
-
-    if input_min == input_max
-        error("Input range cannot have equal min and max values.")
-    end
-
-    # Normalize the input value to a range of [0, 1]
-    normalized_value = (value - input_min) / (input_max - input_min)
-
-    # Scale the normalized value to the output range
-    rescaled_value = output_min + (normalized_value * (output_max - output_min))
-
-    return rescaled_value
-end
-
 """
     color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba;
         default_rgba=[0.,0.,0.,0.05], node_size=50, edge_color=(0.7,0.7,0.7,0.1),
