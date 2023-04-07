@@ -81,7 +81,15 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     f_select::Function; f_feature::Function=identity, default_rgba=[0.,0.,0.,0.05], node_size=50,
     edge_color=(0.7,0.7,0.7,0.1), edge_thicness_scaler=0.2,
     cmap=ColorMap("viridis"), vmin::Float64=0., vmax::Float64=1.,
-    figsize=(3,3), n_control=10000, f_control_var::Function=std, verbose=true)
+    figsize=(3,3), n_control=10000, f_control_var::Function=std, verbose=true,
+    vertical_kde_side=:right, horizontal_kde_sie=:top, main_to_kde_ratio::Int=4)
+    if !(vertical_kde_side ∈ [:left, :right])
+        error("vertical_kde_side should be `:left` or `:right`")
+    end
+    if !(horizontal_kde_sie ∈ [:top, :bottom])
+        error("horizontal_kde_sie should be `:top` or `:bottom`")
+    end
+
     ## graph: remove nodes
     g = py_copy.deepcopy(g_plot)
     for node = list_node_rm
@@ -98,10 +106,12 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
 
     ## plot
     fig = figure(figsize=figsize)
-    gs = matplotlib.gridspec.GridSpec(4,4) # row, col
+    gs = matplotlib.gridspec.GridSpec(main_to_kde_ratio,main_to_kde_ratio) # row, col
     
     ## scatter
-    ax_main = subplot(get(gs, (pyb_slice(1,4),pyb_slice(0,3))))
+    rg_ax_main_row = horizontal_kde_sie == :top ? pyb_slice(1,main_to_kde_ratio) : pyb_slice(0,main_to_kde_ratio-1)
+    rg_ax_main_col = vertical_kde_side == :left ? pyb_slice(1,main_to_kde_ratio) : pyb_slice(0,main_to_kde_ratio-1)
+    ax_main = subplot(get(gs, (rg_ax_main_row, rg_ax_main_col)))
     color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba,
         default_rgba=default_rgba, node_size=node_size, edge_color=edge_color,
         edge_thicness_scaler=edge_thicness_scaler)
@@ -170,7 +180,9 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
 
     # kde top (x)
     # plot kde - selected features
-    ax_top = subplot(get(gs, (0,pyb_slice(0,3))), sharex=ax_main)
+    rg_ax_horizontal_row = horizontal_kde_sie == :top ? 0 : main_to_kde_ratio-1
+    rg_ax_horizontal_col = vertical_kde_side == :left ? pyb_slice(1,main_to_kde_ratio) : pyb_slice(0,main_to_kde_ratio-1)
+    ax_horizontal = subplot(get(gs, (rg_ax_horizontal_row, rg_ax_horizontal_col)), sharex=ax_main)
     plot(rg_x, pdf_x)
 
     # plot kde - random control
@@ -181,7 +193,9 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
 
     # kde right (y)
     # plot kde - selected features
-    ax_right = subplot(get(gs, (pyb_slice(1,4), 3)), sharey=ax_main)
+    rg_ax_vertical_row = horizontal_kde_sie == :top ? pyb_slice(1,main_to_kde_ratio) : pyb_slice(0,main_to_kde_ratio-1)
+    rg_ax_vertical_col = vertical_kde_side == :left ? 0 : main_to_kde_ratio-1
+    ax_vertical = subplot(get(gs, (rg_ax_vertical_row, rg_ax_vertical_col)), sharey=ax_main)
     plot(pdf_y, rg_y)
 
     # plot kde - random control
