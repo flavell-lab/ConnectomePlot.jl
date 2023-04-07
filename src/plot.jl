@@ -100,7 +100,7 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     dict_rgba = Dict()
     for (k,v) = dict_v
         v_ = clamp(f_feature(v), vmin, vmax)
-        v_ = rescale_to_range(v_, (vmin, vmax), (0.,1.))
+        v_ = rescale_to_range(v_, vmin, vmax, 0.,1.)
         dict_rgba[k] = collect(cmap(v_))
     end
 
