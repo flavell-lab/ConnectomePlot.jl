@@ -39,18 +39,24 @@ function color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba;
         feature_ = zeros(3)
 
         if !occursin(r"[A-Z]{2}\d", neuron) # check if not vc motor
-            class, dv, lr = get_neuron_class(neuron)
-            
-            class_dv = class
-            if !(dv == "missing" || dv == "undefined")
-                class_dv = class * dv
-            end
-            
-            if haskey(dict_rgba, class_dv)
-                dict_node_color[neuron] = dict_rgba[class_dv]
+            if haskey(dict_rgba, neuron) 
+                # neuron provided with or the class does not have dv & lr
+                dict_node_color[neuron] = dict_rgba[neuron]
                 q_color_saved = true
             else
-                # println("$class missing in class dict")
+                class, dv, lr = get_neuron_class(neuron)
+                
+                class_dv = class
+                if !(dv == "missing" || dv == "undefined")
+                    class_dv = class * dv
+                end
+                
+                if haskey(dict_rgba, class_dv)
+                    dict_node_color[neuron] = dict_rgba[class_dv]
+                    q_color_saved = true
+                else
+                    # println("$class missing in class dict")
+                end
             end
         end # if not vc motor
         
