@@ -215,12 +215,10 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     subplots_adjust(wspace=0.05, hspace=0.05)
 end
 
-function color_connectome_multi_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, dict_v::Dict,
-    list_f_select::Vector{Function}; f_feature::Function=identity, default_rgba=[0.,0.,0.,0.05], node_size=50,
-    edge_color=(0.7,0.7,0.7,0.1), edge_thicness_scaler=0.2,
-    cmap=ColorMap("viridis"), vmin::Float64=0., vmax::Float64=1.,
-    figsize=(3,3), verbose=true, vertical_kde_side=:right, horizontal_kde_sie=:top, main_to_kde_ratio::Int=4,
-    list_color_kde=nothing)
+function color_connectome_multi_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict; dict_v::Dict, dict_rgba::Dict,
+    list_f_select::Vector{Function}, f_feature::Function=identity, default_rgba=[0.,0.,0.,0.05], node_size=50,
+    edge_color=(0.7,0.7,0.7,0.1), edge_thicness_scaler=0.2, figsize=(3,3), verbose=true,
+    vertical_kde_side=:right, horizontal_kde_sie=:top, main_to_kde_ratio::Int=4, list_color_kde=nothing)
     if !(vertical_kde_side ∈ [:left, :right])
         error("vertical_kde_side should be `:left` or `:right`")
     end
@@ -232,14 +230,6 @@ function color_connectome_multi_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::
     g = py_copy.deepcopy(g_plot)
     for node = list_node_rm
         g.remove_node(node)
-    end
-
-    ## color dict
-    dict_rgba = Dict()
-    for (k,v) = dict_v
-        v_ = clamp(f_feature(v), vmin, vmax)
-        v_ = rescale_to_range(v_, vmin, vmax, 0.,1.)
-        dict_rgba[k] = collect(cmap(v_))
     end
 
     ## plot
@@ -264,8 +254,14 @@ function color_connectome_multi_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::
     rg_y = ax_ylim[1]:ax_Δy:ax_ylim[2]
    
     n_kde = length(list_f_select)
-    if !isnothing(list_color_kde) && n_kde != length(list_color_kde)
-        error("length(list_color_kde) != length(list_f_select)")
+    list_color_kde = if isnothing(list_color_kde)
+        ["C$(i-1)" for i = 1:n_kde]
+    else
+        if length(list_color_kde) == n_kde
+            list_color_kde
+        else
+            error("length(list_color_kde) != length(list_f_select)")
+        end
     end
 
     # kde top (x)
@@ -291,7 +287,9 @@ function color_connectome_multi_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::
         idx_select = findall(f_select.(list_f))
         n_neuron_select = length(idx_select)
 
-        error("n_neuron_select < 3")
+        if n_neuron_select < 3
+            error("n_neuron_select < 3 for $(i)-th selector")
+        end
 
         if verbose
             println("selector $i neuron selected: $n_neuron_select \
@@ -301,19 +299,17 @@ function color_connectome_multi_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::
         kd_x_all = kde(list_x)
         kd_x_select = kde(list_x[idx_select])
         pdf_x = [pdf(kd_x_select,x) for x = rg_x]
-        y1, y2, y3, _ = aggregate_var(rand_x_kde, dim=2, f_var=f_control_var)
 
         kd_y_all = kde(list_y)
         kd_y_select = kde(list_y[idx_select])
         pdf_y = ax_Δratio * [pdf(kd_y_select,pd) for pd = rg_y]
-        x1, x2, x3, _ = aggregate_var(rand_y_kde, dim=2, f_var=f_control_var)
 
-        plot_ymax = max(maximum(pdf_x), maximum(y3))
-        plot_xmax = max(maximum(pdf_y), maximum(x3))
+        plot_ymax = maximum(pdf_x)
+        plot_xmax = maximum(pdf_y)
         plot_max = max(plot_max, 1.05 * max(plot_ymax, plot_xmax))
 
-        ax_horizontal.plot(rg_x, pdf_x, color=list_color_kde[i], linewidth=linewidth_kde)
-        ax_vertical.plot(pdf_y, rg_y, color=list_color_kde[i], linewidth=linewidth_kde)
+        ax_horizontal.plot(rg_x, pdf_x, color=list_color_kde[i])
+        ax_vertical.plot(pdf_y, rg_y, color=list_color_kde[i])
     end
     ax_horizontal.set_ylim(0., plot_max)
     ax_vertical.set_xlim(0., plot_max)
