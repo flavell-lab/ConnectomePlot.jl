@@ -214,3 +214,113 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     # remove space between subplots
     subplots_adjust(wspace=0.05, hspace=0.05)
 end
+
+function color_connectome_multi_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, dict_v::Dict,
+    list_f_select::Vector{Function}; f_feature::Function=identity, default_rgba=[0.,0.,0.,0.05], node_size=50,
+    edge_color=(0.7,0.7,0.7,0.1), edge_thicness_scaler=0.2,
+    cmap=ColorMap("viridis"), vmin::Float64=0., vmax::Float64=1.,
+    figsize=(3,3), verbose=true, vertical_kde_side=:right, horizontal_kde_sie=:top, main_to_kde_ratio::Int=4,
+    list_color_kde=nothing)
+    if !(vertical_kde_side ∈ [:left, :right])
+        error("vertical_kde_side should be `:left` or `:right`")
+    end
+    if !(horizontal_kde_sie ∈ [:top, :bottom])
+        error("horizontal_kde_sie should be `:top` or `:bottom`")
+    end
+
+    ## graph: remove nodes
+    g = py_copy.deepcopy(g_plot)
+    for node = list_node_rm
+        g.remove_node(node)
+    end
+
+    ## color dict
+    dict_rgba = Dict()
+    for (k,v) = dict_v
+        v_ = clamp(f_feature(v), vmin, vmax)
+        v_ = rescale_to_range(v_, vmin, vmax, 0.,1.)
+        dict_rgba[k] = collect(cmap(v_))
+    end
+
+    ## plot
+    fig = figure(figsize=figsize)
+    gs = matplotlib.gridspec.GridSpec(main_to_kde_ratio,main_to_kde_ratio) # row, col
+    
+    ## scatter
+    rg_ax_main_row = horizontal_kde_sie == :top ? pyb_slice(1,main_to_kde_ratio) : pyb_slice(0,main_to_kde_ratio-1)
+    rg_ax_main_col = vertical_kde_side == :left ? pyb_slice(1,main_to_kde_ratio) : pyb_slice(0,main_to_kde_ratio-1)
+    ax_main = subplot(get(gs, (rg_ax_main_row, rg_ax_main_col)))
+    color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba,
+        default_rgba=default_rgba, node_size=node_size, edge_color=edge_color,
+        edge_thicness_scaler=edge_thicness_scaler)
+    
+    ## plot limits
+    ax_xlim = gca().get_xlim()
+    ax_ylim = gca().get_ylim()
+    ax_Δx = (ax_xlim[2] - ax_xlim[1]) / 100
+    ax_Δy = (ax_ylim[2] - ax_ylim[1]) / 100
+    ax_Δratio = ax_Δy / ax_Δx
+    rg_x = ax_xlim[1]:ax_Δx:ax_xlim[2]
+    rg_y = ax_ylim[1]:ax_Δy:ax_ylim[2]
+   
+    n_kde = length(list_f_select)
+    if !isnothing(list_color_kde) && n_kde != length(list_color_kde)
+        error("length(list_color_kde) != length(list_f_select)")
+    end
+
+    # kde top (x)
+    # plot kde - selected features
+    rg_ax_horizontal_row = horizontal_kde_sie == :top ? 0 : main_to_kde_ratio-1
+    rg_ax_horizontal_col = vertical_kde_side == :left ? pyb_slice(1,main_to_kde_ratio) : pyb_slice(0,main_to_kde_ratio-1)
+    ax_horizontal = subplot(get(gs, (rg_ax_horizontal_row, rg_ax_horizontal_col)), sharex=ax_main)
+    # plot(rg_x, pdf_x)
+
+    # kde right (y)
+    # plot kde - selected features
+    rg_ax_vertical_row = horizontal_kde_sie == :top ? pyb_slice(1,main_to_kde_ratio) : pyb_slice(0,main_to_kde_ratio-1)
+    rg_ax_vertical_col = vertical_kde_side == :left ? 0 : main_to_kde_ratio-1
+    ax_vertical = subplot(get(gs, (rg_ax_vertical_row, rg_ax_vertical_col)), sharey=ax_main)
+    # plot(pdf_y, rg_y)
+
+    # kde plot
+    plot_max = 0.
+    for (i, f_select) = enumerate(list_f_select)
+        list_x, list_y, list_f = get_connectome_plot_lists(dict_x, dict_y, dict_v, f_select)
+        @assert(length(list_x) == length(list_y) == length(list_f))
+        idx_all = 1:length(list_f)
+        idx_select = findall(f_select.(list_f))
+        n_neuron_select = length(idx_select)
+
+        error("n_neuron_select < 3")
+
+        if verbose
+            println("selector $i neuron selected: $n_neuron_select \
+            percentage: $(round(n_neuron_select/length(list_f)*100, digits=2))")
+        end
+
+        kd_x_all = kde(list_x)
+        kd_x_select = kde(list_x[idx_select])
+        pdf_x = [pdf(kd_x_select,x) for x = rg_x]
+        y1, y2, y3, _ = aggregate_var(rand_x_kde, dim=2, f_var=f_control_var)
+
+        kd_y_all = kde(list_y)
+        kd_y_select = kde(list_y[idx_select])
+        pdf_y = ax_Δratio * [pdf(kd_y_select,pd) for pd = rg_y]
+        x1, x2, x3, _ = aggregate_var(rand_y_kde, dim=2, f_var=f_control_var)
+
+        plot_ymax = max(maximum(pdf_x), maximum(y3))
+        plot_xmax = max(maximum(pdf_y), maximum(x3))
+        plot_max = max(plot_max, 1.05 * max(plot_ymax, plot_xmax))
+
+        ax_horizontal.plot(rg_x, pdf_x, color=list_color_kde[i], linewidth=linewidth_kde)
+        ax_vertical.plot(pdf_y, rg_y, color=list_color_kde[i], linewidth=linewidth_kde)
+    end
+    ax_horizontal.set_ylim(0., plot_max)
+    ax_vertical.set_xlim(0., plot_max)
+
+    ax_horizontal.set_axis_off()
+    ax_vertical.set_axis_off()
+
+    # remove space between subplots
+    subplots_adjust(wspace=0.05, hspace=0.05)
+end
