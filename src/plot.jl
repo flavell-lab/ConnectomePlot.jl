@@ -20,12 +20,12 @@ Color the connectome graph.
 """
 function color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba;
     default_rgba=[0.,0.,0.,0.05], node_size=50, edge_color=(0.7,0.7,0.7,0.1),
-    edge_thicness_scaler=0.2)
+    edge_thicness_scaler=0.2, scatter_edgecolor="none")
     @assert(collect(keys(dict_x)) == collect(keys(dict_y)))
 
     dict_pos = Dict()
     dict_node_color = Dict()
-
+    dict_node_edgecolor = Dict()
     # graph: remove nodes
     g = py_copy.deepcopy(g_plot)
     for node = list_node_rm
@@ -42,6 +42,7 @@ function color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba;
             if haskey(dict_rgba, neuron) 
                 # neuron provided with or the class does not have dv & lr
                 dict_node_color[neuron] = dict_rgba[neuron]
+                dict_node_edgecolor[neuron] = scatter_edgecolor
                 q_color_saved = true
             else
                 class, dv, lr = get_neuron_class(neuron)
@@ -53,6 +54,7 @@ function color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba;
                 
                 if haskey(dict_rgba, class_dv)
                     dict_node_color[neuron] = dict_rgba[class_dv]
+                    dict_node_edgecolor[neuron] = scatter_edgecolor
                     q_color_saved = true
                 else
                     # println("$class missing in class dict")
@@ -62,6 +64,7 @@ function color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba;
         
         if !q_color_saved
             dict_node_color[neuron] = default_rgba
+            dict_node_edgecolor[neuron] = "none"
         end
     end # neuron
 
@@ -74,9 +77,11 @@ function color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba;
         end
     end    
 
+
     list_node_color = hcat([dict_node_color[node] for node = g.nodes()]...)'
+    list_node_edgecolor = [dict_node_edgecolor[node] for node = g.nodes()]
     nodes = py_nx.draw_networkx_nodes(g, dict_pos, node_size=node_size, node_color=list_node_color)
-    nodes.set_edgecolor("none")
+    nodes.set_edgecolor(list_node_edgecolor)
     py_nx.draw_networkx_edges(g, dict_pos, style="-", arrows=false, edge_color=edge_color,
         edgelist=[(u,v) for (u,v) =  g.edges],
         width=[g.edges.get((u,v))["weight"] * edge_thicness_scaler for (u,v) = g.edges])     
@@ -88,7 +93,8 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     edge_color=(0.7,0.7,0.7,0.1), edge_thicness_scaler=0.2,
     cmap=ColorMap("viridis"), vmin::Float64=0., vmax::Float64=1.,
     figsize=(3,3), n_control=10000, f_control_var::Function=std, verbose=true,
-    vertical_kde_side=:right, horizontal_kde_sie=:top, main_to_kde_ratio::Int=4)
+    vertical_kde_side=:right, horizontal_kde_sie=:top, main_to_kde_ratio::Int=4,
+    scatter_edgecolor="none")
     if !(vertical_kde_side ∈ [:left, :right])
         error("vertical_kde_side should be `:left` or `:right`")
     end
@@ -120,7 +126,7 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     ax_main = subplot(get(gs, (rg_ax_main_row, rg_ax_main_col)))
     color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba,
         default_rgba=default_rgba, node_size=node_size, edge_color=edge_color,
-        edge_thicness_scaler=edge_thicness_scaler)
+        edge_thicness_scaler=edge_thicness_scaler, scatter_edgecolor=scatter_edgecolor)
     
     ## plot limits
     ax_xlim = gca().get_xlim()
@@ -218,7 +224,8 @@ end
 function color_connectome_multi_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict; dict_v::Dict, dict_rgba::Dict,
     list_f_select::Vector{Function}, f_feature::Function=identity, default_rgba=[0.,0.,0.,0.05], node_size=50,
     edge_color=(0.7,0.7,0.7,0.1), edge_thicness_scaler=0.2, figsize=(3,3), verbose=true,
-    vertical_kde_side=:right, horizontal_kde_sie=:top, main_to_kde_ratio::Int=4, list_color_kde=nothing)
+    vertical_kde_side=:right, horizontal_kde_sie=:top, main_to_kde_ratio::Int=4, list_color_kde=nothing,
+    scatter_edgecolor="none")
     if !(vertical_kde_side ∈ [:left, :right])
         error("vertical_kde_side should be `:left` or `:right`")
     end
@@ -242,7 +249,7 @@ function color_connectome_multi_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::
     ax_main = subplot(get(gs, (rg_ax_main_row, rg_ax_main_col)))
     color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba,
         default_rgba=default_rgba, node_size=node_size, edge_color=edge_color,
-        edge_thicness_scaler=edge_thicness_scaler)
+        edge_thicness_scaler=edge_thicness_scaler, scatter_edgecolor=scatter_edgecolor)
     
     ## plot limits
     ax_xlim = gca().get_xlim()
