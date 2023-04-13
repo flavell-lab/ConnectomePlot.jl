@@ -68,7 +68,7 @@ function get_node_name(neuron; dv=true, lr=true)
 end
 
 # generate graph
-function get_graph_white(min_n_edge=1; merge_dv=false, merge_lr=false)
+function get_graph_white(min_n_edge=1; merge_dv=false, merge_lr=false, synapse_electrical=true, synapse_chemical=true)
     list_connectome = [data_connectome_white]
     
     list_neuron = []
@@ -106,20 +106,24 @@ function get_graph_white(min_n_edge=1; merge_dv=false, merge_lr=false)
     for ((pre,post,syn_type), edge_count) = dict_synapese
         if pre != post
             if edge_count > min_n_edge
-                k = (pre,post)
-                if haskey(dict_synapse_combine, k)
-                    dict_synapse_combine[k] += edge_count
-                else
-                    dict_synapse_combine[k] = edge_count
-                end
-                
-                if syn_type == "electrical" # treat electrical synapse as bidirectional
-                    k = (post,pre)
+                if syn_type == "chemical" && synapse_chemical
+                    k = (pre,post)
                     if haskey(dict_synapse_combine, k)
                         dict_synapse_combine[k] += edge_count
                     else
                         dict_synapse_combine[k] = edge_count
+                    end                
+                elseif syn_type == "electrical" && synapse_electrical
+                     # treat electrical synapse as bidirectional
+                    for k = [(pre,post), (post,pre)]
+                        if haskey(dict_synapse_combine, k)
+                            dict_synapse_combine[k] += edge_count
+                        else
+                            dict_synapse_combine[k] = edge_count
+                        end
                     end
+                else
+                    error("unknown synapse type $syn_type")
                 end
             end # if edge_count > min_n_edge
         end # if pre != post
@@ -140,8 +144,10 @@ function get_graph_white(min_n_edge=1; merge_dv=false, merge_lr=false)
     g
 end
 
-function get_graph_white_p(min_n_edge=1; merge_dv=false, merge_lr=false)
-    g_wh_lr_p = get_graph_white(min_n_edge, merge_dv=merge_dv, merge_lr=merge_lr)
+function get_graph_white_p(min_n_edge=1; merge_dv=false, merge_lr=false,
+    synapse_electrical=true, synapse_chemical=true)
+    g_wh_lr_p = get_graph_white(min_n_edge, merge_dv=merge_dv, merge_lr=merge_lr,
+        synapse_electrical=synapse_electrical, synapse_chemical=synapse_chemical)
     g = g_wh_lr_p
 
     # remove orphan node, pharyngeal
@@ -168,7 +174,7 @@ function get_graph_white_p(min_n_edge=1; merge_dv=false, merge_lr=false)
     g
 end
 
-function get_graph_witvliet(min_n_edge=2; merge_dv=false, merge_lr=false)
+function get_graph_witvliet(min_n_edge=2; merge_dv=false, merge_lr=false, synapse_electrical=true, synapse_chemical=true)
     list_connectome = [data_connectome_witvliet_7, data_connectome_witvliet_8]
     
     # get list of neurons in the connectome
@@ -205,24 +211,28 @@ function get_graph_witvliet(min_n_edge=2; merge_dv=false, merge_lr=false)
     dict_synapse_combine = Dict()
     for ((pre,post,syn_type), edge_count) = dict_synapese
         if pre != post
-            if edge_count > 2
-                k = (pre,post)
-                if haskey(dict_synapse_combine, k)
-                    dict_synapse_combine[k] += edge_count
-                else
-                    dict_synapse_combine[k] = edge_count
-                end
-                
-                if syn_type == "electrical"
-                    k = (post,pre)
+            if edge_count > min_n_edge
+                if syn_type == "chemical" && synapse_chemical
+                    k = (pre,post)
                     if haskey(dict_synapse_combine, k)
                         dict_synapse_combine[k] += edge_count
                     else
                         dict_synapse_combine[k] = edge_count
+                    end                
+                elseif syn_type == "electrical" && synapse_electrical
+                     # treat electrical synapse as bidirectional
+                    for k = [(pre,post), (post,pre)]
+                        if haskey(dict_synapse_combine, k)
+                            dict_synapse_combine[k] += edge_count
+                        else
+                            dict_synapse_combine[k] = edge_count
+                        end
                     end
+                else
+                    error("unknown synapse type $syn_type")
                 end
-            end
-        end
+            end # if edge_count > min_n_edge
+        end # if pre != post
     end
     
     #for ((pre,post,syn_type), edge_count) = dict_synapese

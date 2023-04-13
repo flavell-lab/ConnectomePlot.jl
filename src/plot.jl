@@ -225,7 +225,7 @@ function color_connectome_multi_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::
     list_f_select::Vector{Function}, f_feature::Function=identity, default_rgba=[0.,0.,0.,0.05], node_size=50,
     edge_color=(0.7,0.7,0.7,0.1), edge_thicness_scaler=0.2, figsize=(3,3), verbose=true,
     vertical_kde_side=:right, horizontal_kde_sie=:top, main_to_kde_ratio::Int=4, list_color_kde=nothing,
-    scatter_edgecolor="none")
+    scatter_edgecolor="none", xlim_scatter=nothing, ylim_scatter=nothing)
     if !(vertical_kde_side ∈ [:left, :right])
         error("vertical_kde_side should be `:left` or `:right`")
     end
@@ -250,10 +250,16 @@ function color_connectome_multi_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::
     color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba,
         default_rgba=default_rgba, node_size=node_size, edge_color=edge_color,
         edge_thicness_scaler=edge_thicness_scaler, scatter_edgecolor=scatter_edgecolor)
-    
+    if !isnothing(ylim_scatter)
+        ylim(ylim_scatter...)
+    end
+    if !isnothing(xlim_scatter)
+        xlim(xlim_scatter...)
+    end
+
     ## plot limits
-    ax_xlim = gca().get_xlim()
-    ax_ylim = gca().get_ylim()
+    ax_xlim = isnothing(xlim_scatter) ? gca().get_xlim() : xlim_scatter
+    ax_ylim = isnothing(ylim_scatter) ? gca().get_ylim() : ylim_scatter
     ax_Δx = (ax_xlim[2] - ax_xlim[1]) / 100
     ax_Δy = (ax_ylim[2] - ax_ylim[1]) / 100
     ax_Δratio = ax_Δy / ax_Δx
@@ -318,8 +324,18 @@ function color_connectome_multi_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::
         ax_horizontal.plot(rg_x, pdf_x, color=list_color_kde[i])
         ax_vertical.plot(pdf_y, rg_y, color=list_color_kde[i])
     end
-    ax_horizontal.set_ylim(0., plot_max)
-    ax_vertical.set_xlim(0., plot_max)
+
+    if horizontal_kde_sie == :top
+        ax_horizontal.set_ylim(-3., plot_max)
+    else
+        ax_horizontal.set_ylim(plot_max, -3.)
+    end
+
+    if vertical_kde_side == :left
+        ax_vertical.set_xlim(plot_max,-3.)
+    else
+        ax_vertical.set_xlim(-3., plot_max)
+    end
 
     ax_horizontal.set_axis_off()
     ax_vertical.set_axis_off()
