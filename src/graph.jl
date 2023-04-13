@@ -107,19 +107,23 @@ function get_graph_white(min_n_edge=1; merge_dv=false, merge_lr=false, synapse_e
         if pre != post
             if edge_count > min_n_edge
                 if syn_type == "chemical" && synapse_chemical
-                    k = (pre,post)
-                    if haskey(dict_synapse_combine, k)
-                        dict_synapse_combine[k] += edge_count
-                    else
-                        dict_synapse_combine[k] = edge_count
-                    end                
-                elseif syn_type == "electrical" && synapse_electrical
-                     # treat electrical synapse as bidirectional
-                    for k = [(pre,post), (post,pre)]
+                    if synapse_chemical
+                        k = (pre,post)
                         if haskey(dict_synapse_combine, k)
                             dict_synapse_combine[k] += edge_count
                         else
                             dict_synapse_combine[k] = edge_count
+                        end                
+                    end
+                elseif syn_type == "electrical"
+                    if synapse_electrical
+                        # treat electrical synapse as bidirectional
+                        for k = [(pre,post), (post,pre)]
+                            if haskey(dict_synapse_combine, k)
+                                dict_synapse_combine[k] += edge_count
+                            else
+                                dict_synapse_combine[k] = edge_count
+                            end
                         end
                     end
                 else
@@ -212,20 +216,24 @@ function get_graph_witvliet(min_n_edge=2; merge_dv=false, merge_lr=false, synaps
     for ((pre,post,syn_type), edge_count) = dict_synapese
         if pre != post
             if edge_count > min_n_edge
-                if syn_type == "chemical" && synapse_chemical
-                    k = (pre,post)
-                    if haskey(dict_synapse_combine, k)
-                        dict_synapse_combine[k] += edge_count
-                    else
-                        dict_synapse_combine[k] = edge_count
-                    end                
-                elseif syn_type == "electrical" && synapse_electrical
-                     # treat electrical synapse as bidirectional
-                    for k = [(pre,post), (post,pre)]
+                if syn_type == "chemical"
+                    if synapse_chemical
+                        k = (pre,post)
                         if haskey(dict_synapse_combine, k)
                             dict_synapse_combine[k] += edge_count
                         else
                             dict_synapse_combine[k] = edge_count
+                        end                
+                    end
+                elseif syn_type == "electrical"
+                    if synapse_electrical
+                        # treat electrical synapse as bidirectional
+                        for k = [(pre,post), (post,pre)]
+                            if haskey(dict_synapse_combine, k)
+                                dict_synapse_combine[k] += edge_count
+                            else
+                                dict_synapse_combine[k] = edge_count
+                            end
                         end
                     end
                 else
