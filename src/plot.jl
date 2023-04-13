@@ -20,7 +20,7 @@ Color the connectome graph.
 """
 function color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba;
     default_rgba=[0.,0.,0.,0.05], node_size=50, edge_color=(0.7,0.7,0.7,0.1),
-    edge_thicness_scaler=0.2, scatter_edgecolor="none")
+    edge_thicness_scaler=0.2, scatter_edgecolor="none", node_plot_order=nothing)
     @assert(collect(keys(dict_x)) == collect(keys(dict_y)))
 
     dict_pos = Dict()
@@ -43,6 +43,7 @@ function color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba;
                 # neuron provided with or the class does not have dv & lr
                 dict_node_color[neuron] = dict_rgba[neuron]
                 dict_node_edgecolor[neuron] = scatter_edgecolor
+
                 q_color_saved = true
             else
                 class, dv, lr = get_neuron_class(neuron)
@@ -80,8 +81,15 @@ function color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba;
 
     list_node_color = hcat([dict_node_color[node] for node = g.nodes()]...)'
     list_node_edgecolor = [dict_node_edgecolor[node] for node = g.nodes()]
-    nodes = py_nx.draw_networkx_nodes(g, dict_pos, node_size=node_size, node_color=list_node_color)
-    nodes.set_edgecolor(list_node_edgecolor)
+    if isnothing(node_plot_order)
+        nodes = py_nx.draw_networkx_nodes(g, dict_pos, node_size=node_size, node_color=list_node_color)
+        nodes.set_edgecolor(list_node_edgecolor)
+    else
+        for k = node_plot_order
+            nodes = py_nx.draw_networkx_nodes(g, dict_pos, node_size=node_size, nodelist=[k], node_color=reshape(dict_node_color[k],(1,4)))
+            nodes.set_edgecolor(list_node_edgecolor)
+        end
+    end
     py_nx.draw_networkx_edges(g, dict_pos, style="-", arrows=false, edge_color=edge_color,
         edgelist=[(u,v) for (u,v) =  g.edges],
         width=[g.edges.get((u,v))["weight"] * edge_thicness_scaler for (u,v) = g.edges])     
@@ -94,7 +102,7 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     cmap=ColorMap("viridis"), vmin::Float64=0., vmax::Float64=1.,
     figsize=(3,3), n_control=10000, f_control_var::Function=std, verbose=true,
     vertical_kde_side=:right, horizontal_kde_sie=:top, main_to_kde_ratio::Int=4,
-    scatter_edgecolor="none")
+    scatter_edgecolor="none", xlim_scatter=nothing, ylim_scatter=nothing)
     if !(vertical_kde_side ∈ [:left, :right])
         error("vertical_kde_side should be `:left` or `:right`")
     end
@@ -127,10 +135,16 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba,
         default_rgba=default_rgba, node_size=node_size, edge_color=edge_color,
         edge_thicness_scaler=edge_thicness_scaler, scatter_edgecolor=scatter_edgecolor)
+    if !isnothing(ylim_scatter)
+        ylim(ylim_scatter...)
+    end
+    if !isnothing(xlim_scatter)
+        xlim(xlim_scatter...)
+    end
     
     ## plot limits
-    ax_xlim = gca().get_xlim()
-    ax_ylim = gca().get_ylim()
+    ax_xlim = isnothing(xlim_scatter) ? gca().get_xlim() : xlim_scatter
+    ax_ylim = isnothing(ylim_scatter) ? gca().get_ylim() : ylim_scatter
     ax_Δx = (ax_xlim[2] - ax_xlim[1]) / 100
     ax_Δy = (ax_ylim[2] - ax_ylim[1]) / 100
     ax_Δratio = ax_Δy / ax_Δx
@@ -200,9 +214,6 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     # plot kde - random control
     plot(rg_x, y2, color="gray")
     fill_between(rg_x, y1, y3, color="gray", alpha=0.2, linewidth=0)
-    ylim(-5.,plot_max)
-    axis("off")
-
     # kde right (y)
     # plot kde - selected features
     rg_ax_vertical_row = horizontal_kde_sie == :top ? pyb_slice(1,main_to_kde_ratio) : pyb_slice(0,main_to_kde_ratio-1)
@@ -214,8 +225,20 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     plot(ax_Δratio * x2, rg_y, color="gray")
     fill_betweenx(rg_y, ax_Δratio * x1, ax_Δratio * x3, color="gray", alpha=0.2, linewidth=0)
 
-    xlim(-5.,plot_max)
-    axis("off")
+    # if horizontal_kde_sie == :top
+    #     ax_horizontal.set_ylim(-3., plot_max)
+    # else
+    #     ax_horizontal.set_ylim(plot_max, -3.)
+    # end
+
+    # if vertical_kde_side == :left
+    #     ax_vertical.set_xlim(plot_max,-3.)
+    # else
+    #     ax_vertical.set_xlim(-3., plot_max)
+    # end
+
+    ax_horizontal.set_axis_off()
+    ax_vertical.set_axis_off()
 
     # remove space between subplots
     subplots_adjust(wspace=0.05, hspace=0.05)
