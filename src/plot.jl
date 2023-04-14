@@ -20,7 +20,7 @@ Color the connectome graph.
 """
 function color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba;
     default_rgba=[0.,0.,0.,0.05], node_size=50, edge_color=(0.7,0.7,0.7,0.1),
-    edge_thicness_scaler=0.2, scatter_edgecolor="none", node_plot_order=nothing)
+    edge_thicness_scaler=0.2, scatter_edgecolor="none", node_plot_order=nothing, node_label=false, node_label_font_size=6)
     @assert(collect(keys(dict_x)) == collect(keys(dict_y)))
 
     dict_pos = Dict()
@@ -93,6 +93,15 @@ function color_connectome(g_plot, list_node_rm, dict_x, dict_y, dict_rgba;
     py_nx.draw_networkx_edges(g, dict_pos, style="-", arrows=false, edge_color=edge_color,
         edgelist=[(u,v) for (u,v) =  g.edges],
         width=[g.edges.get((u,v))["weight"] * edge_thicness_scaler for (u,v) = g.edges])     
+    
+    if node_label
+            dict_label_node_neuron = Dict()
+        for node = g.nodes
+            dict_label_node_neuron[node] = node
+        end
+        py_nx.draw_networkx_labels(g, dict_pos, labels=dict_label_node_neuron,
+            font_size=node_label_font_size, font_family="arial", font_weight="normal")
+    end
 
 end
 
