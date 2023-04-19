@@ -19,6 +19,7 @@ export get_neuron_type_wh_dvlr,
     color_connectome,
     color_connectome_kde,
     color_connectome_multi_kde,
+    test_signifiance_connectome,
     # data.jl
     get_dict_pos_patched,
     # table.jl

@@ -251,6 +251,8 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
 
     # remove space between subplots
     subplots_adjust(wspace=0.05, hspace=0.05)
+
+    ax_main, ax_vertical, ax_horizontal
 end
 
 function color_connectome_multi_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict; dict_v::Dict, dict_rgba::Dict,
@@ -374,4 +376,75 @@ function color_connectome_multi_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::
 
     # remove space between subplots
     subplots_adjust(wspace=0.05, hspace=0.05)
+end
+
+"""
+    test_signifiance_connectome(dict_axis::Dict, dict_feature::Dict, f_select::Function, bins)
+
+Test the significance of the connectome plot by comparing the distribution of the selected features with the distribution of all features.
+
+# Arguments
+- `dict_axis::Dict`: dictionary of the axis values, key is the neuron name, value is the axis value
+- `dict_feature::Dict`: dictionary of the feature values, key is the neuron name, value is the feature value
+- `f_select::Function`: function to select the feature, the function should take a single argument and return a boolean value
+- `bins`: number of bins for the histogram
+"""
+function test_signifiance_connectome(dict_axis::Dict, dict_feature::Dict, f_select::Function, bins)
+    list_all = Float64[]
+    list_select = Float64[]
+
+    for (neuron,x) = dict_axis
+        if !occursin(r"[A-Z]{2}\d", neuron) # check if not vc motor
+            if haskey(dict_feature, neuron) 
+                # neuron provided with or the class does not have dv & lr
+                
+                push!(list_all, x)
+                v = dict_feature[neuron]
+                if f_select(v)
+                    push!(list_select, x)
+                end
+            else
+                class, dv, lr = get_neuron_class(neuron)
+                
+                class_dv = class
+                if !(dv == "missing" || dv == "undefined")
+                    class_dv = class * dv
+                end
+                
+                if haskey(dict_feature, class_dv)
+                    push!(list_all, x)
+                    v = dict_feature[class_dv]
+                    if f_select(v)
+                        push!(list_select, x)
+                    end
+                else
+                    # println("$class missing in class dict")
+                end
+            end
+        end # if not vc motor
+    end
+    
+    for range_bin_indices = 1:(length(bins) - 1)
+    
+        # observed frequencies
+        observed = fit(Histogram, list_all, bins).weights
+        observed_special = fit(Histogram, list_select, bins).weights
+
+        # the proportion of selected in the range of interest
+        observed_proportion = sum(observed_special[range_bin_indices]) / sum(observed_special)
+
+        # expected proportion of selected points in the range of interest
+        expected_proportion = sum(observed[range_bin_indices]) / sum(observed)
+
+        p_hat = observed_proportion
+        p_pop = expected_proportion
+        n = sum(observed_special)
+
+        z_score = (p_hat - p_pop) / sqrt((p_pop * (1 - p_pop))/(n))
+        p_value = 2 * (1 - cdf(Normal(), abs(z_score)))
+        
+        println("bin start: $(bins[range_bin_indices]) p_val: $p_value")
+    end
+    
+    nothing
 end

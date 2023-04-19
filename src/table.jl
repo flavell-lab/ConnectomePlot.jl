@@ -27,6 +27,7 @@ function neuropal_aggregate_data(list_dict_fit, list_match_dict, list_use_uid, l
         for class_dv = list_class_dv
             if haskey(match_dict, class_dv)
                 list_match = match_dict[class_dv]
+
                 for match = list_match
                     idx_neuron = match[2]
                     
