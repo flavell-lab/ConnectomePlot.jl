@@ -389,7 +389,7 @@ Test the significance of the connectome plot by comparing the distribution of th
 - `f_select::Function`: function to select the feature, the function should take a single argument and return a boolean value
 - `bins`: number of bins for the histogram
 """
-function test_signifiance_connectome(dict_axis::Dict, dict_feature::Dict, f_select::Function, bins)
+function test_signifiance_connectome(dict_axis::Dict, dict_feature::Dict, f_select::Function, bins; verbose=true)
     list_all = Float64[]
     list_select = Float64[]
 
@@ -424,6 +424,7 @@ function test_signifiance_connectome(dict_axis::Dict, dict_feature::Dict, f_sele
         end # if not vc motor
     end
     
+    result = Dict[]
     for range_bin_indices = 1:(length(bins) - 1)
     
         # observed frequencies
@@ -443,8 +444,13 @@ function test_signifiance_connectome(dict_axis::Dict, dict_feature::Dict, f_sele
         z_score = (p_hat - p_pop) / sqrt((p_pop * (1 - p_pop))/(n))
         p_value = 2 * (1 - cdf(Normal(), abs(z_score)))
         
-        println("bin start: $(bins[range_bin_indices]) p_val: $p_value")
+        if verbose
+            println("bin start: $(bins[range_bin_indices]) p_val: $p_value")
+        end
+
+        dict_bin = Dict("bin_start" => bins[range_bin_indices], "bin_end"=>bins[range_bin_indices+1], "p_value"=>p_value)
+        push!(result, dict_bin)
     end
     
-    nothing
+    result
 end
