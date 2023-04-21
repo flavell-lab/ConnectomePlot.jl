@@ -376,6 +376,8 @@ function color_connectome_multi_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::
 
     # remove space between subplots
     subplots_adjust(wspace=0.05, hspace=0.05)
+
+    ax_main, ax_vertical, ax_horizontal
 end
 
 """
