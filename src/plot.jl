@@ -234,17 +234,17 @@ function color_connectome_kde(g_plot, list_node_rm, dict_x::Dict, dict_y::Dict, 
     plot(ax_Δratio * x2, rg_y, color="gray")
     fill_betweenx(rg_y, ax_Δratio * x1, ax_Δratio * x3, color="gray", alpha=0.2, linewidth=0)
 
-    # if horizontal_kde_sie == :top
-    #     ax_horizontal.set_ylim(-3., plot_max)
-    # else
-    #     ax_horizontal.set_ylim(plot_max, -3.)
-    # end
+    if horizontal_kde_sie == :top
+        ax_horizontal.set_ylim(-3., plot_max)
+    else
+        ax_horizontal.set_ylim(plot_max, -3.)
+    end
 
-    # if vertical_kde_side == :left
-    #     ax_vertical.set_xlim(plot_max,-3.)
-    # else
-    #     ax_vertical.set_xlim(-3., plot_max)
-    # end
+    if vertical_kde_side == :left
+        ax_vertical.set_xlim(plot_max,-3.)
+    else
+        ax_vertical.set_xlim(-3., plot_max)
+    end
 
     ax_horizontal.set_axis_off()
     ax_vertical.set_axis_off()
