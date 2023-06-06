@@ -1,7 +1,7 @@
 name = "ConnectomePlot"
 uuid = "bccf2298-75b7-4d46-99de-2bfe14709bc4"
-authors = ["Jungsoo Kim <jungsu93@gmail.com>"]
-version = "0.1.0"
+authors = ["Jungsoo Kim <jungsu93@gmail.com>", "Adam Atanas <adamatanas@gmail.com>"]
+version = "0.2.0"
 
 [deps]
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
