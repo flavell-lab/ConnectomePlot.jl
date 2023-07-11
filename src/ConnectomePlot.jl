@@ -30,6 +30,6 @@ export
     neuropal_aggregate_data,
     neuropal_count,
     # significance.jl
-    test_signifiance_connectome,
+    test_signifiance_connectome
 
 end # module ConnectomePlot
