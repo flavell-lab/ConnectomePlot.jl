@@ -1,6 +1,6 @@
 name = "ConnectomePlot"
 uuid = "bccf2298-75b7-4d46-99de-2bfe14709bc4"
-authors = ["Jungsoo Kim <jungsu93@gmail.com>", "Adam Atanas <adamatanas@gmail.com>"]
+authors = ["Jungsoo Kim <jskneuro@gmail.com>", "Adam Atanas <adamatanas@gmail.com>"]
 version = "0.2.0"
 
 [deps]
